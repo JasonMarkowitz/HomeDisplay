@@ -1,0 +1,42 @@
+body {
+	background-color: #4b4c4c;
+	font-family: 'Archivo Black';
+	font-size: 18px;
+	line-height: 1.0;
+	overflow:hidden;
+}
+h1 {
+	color: white;
+	font-size: 25px;
+
+}
+h2 {
+	color: white;
+	font-size: 18px;
+}
+
+h3 {
+	color: white;
+}
+
+p { 
+	color: white;
+	line-height: 0.25;
+	font-size 18px;
+}
+
+#clock {
+	height: auto;
+	float: left;
+	width: 400px;
+}
+
+#weather {
+ width: 400px;
+ float: left;
+ }
+
+#Alarm {
+ float: left;
+ width: 150px;
+}
