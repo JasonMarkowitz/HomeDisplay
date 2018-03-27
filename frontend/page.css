@@ -2,7 +2,6 @@ body {
 	background-color: #4b4c4c;
 	font-family: 'Archivo Black';
 	font-size: 18px;
-	line-height: 1.0;
 	overflow:hidden;
 }
 h1 {
@@ -19,11 +18,18 @@ h3 {
 	color: white;
 }
 
+
 p { 
 	color: white;
-	line-height: 0.25;
 	font-size 18px;
 }
+
+#Trains {
+ float: left;
+ width: 300px;
+ line-height: 1.00;
+ font-size 18px;
+ }
 
 #clock {
 	height: auto;
@@ -32,6 +38,7 @@ p {
 }
 
 #weather {
+ line-height: 0.25;
  width: 400px;
  float: left;
  }
@@ -40,3 +47,4 @@ p {
  float: left;
  width: 150px;
 }
+
