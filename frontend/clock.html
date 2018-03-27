@@ -1,12 +1,12 @@
 <html>
 	<head>
-		<link rel="stylesheet" href="page.css">
 		<link href='https://fonts.googleapis.com/css?family=Archivo Black' rel='stylesheet'>
 		<link rel="stylesheet" href="/clock/flipclock.css">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="/clock/flipclock.js"></script>
 		<script src="/weather.js"></script>		
 		<script src="/trains.js"></script>		
+		<link rel="stylesheet" href="page.css">
 	</head>
 	<body>
 		<div style="width:800px; height:480px">
@@ -34,9 +34,23 @@
 			<p id="later_temp"> </p> 
 			<p id="later_wind_info"></p>
 		</div>
-		<div class="Trains" style="Trains; line-height:1.0; float:left; width 350px; height 300px; margin-left: 100px; margin-top: -140px">
-			<h2> Trains to NYP: </h2>
-			<p id="tr_info_str"</p>
+		<div class="Trains" style="Trains; line-height: 1.0; float:left; width 350px; height 300px; margin-left: 100px; margin-top: -140px">
+			<h2 align= "center"> Trains to NYP: </h2>
+			<p align= "center" ; id="tr_info_str"</p>
+		</div>
+		<div class="Trains" style=" line-height: 1.0; float:left; width 350px; height 300px; margin-left: 100px; ">
+			<h2 align= "center"> NYP Status: </h2>
+			<table>
+				<tr style="p.delays; color: white; border: 1px; padding: 4px;">
+					<th>Delays </th>
+					<th>Cancels </th>
+				</tr>
+				<tr>
+					<td id=tr_delayed> </td>
+					<td id=tr_cancelled> </td>
+				</tr>
+			</table>
+					
 		</div>	
 		</div>
 	</body>

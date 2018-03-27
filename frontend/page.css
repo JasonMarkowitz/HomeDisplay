@@ -2,7 +2,8 @@ body {
 	background-color: #4b4c4c;
 	font-family: 'Archivo Black';
 	font-size: 18px;
-	overflow:hidden;
+	overflow: hidden;
+	color: white;
 }
 h1 {
 	color: white;
@@ -21,7 +22,21 @@ h3 {
 
 p { 
 	color: white;
-	font-size 18px;
+	font-size: 18px;
+}
+
+
+table, th, td, tbody {
+	border: 2px solid #FFFFFF;
+	text-align: center;
+	color: white;
+	font-weight: normal;
+	border-collapse: collapse;
+	padding: 3px
+}
+
+td {
+	border 1px solid #FFFFFF;
 }
 
 #Trains {

@@ -33,9 +33,9 @@ def getweather():
  while count <= 3:
   forecast_data_main = forecast_periods[count]
   if count == 0:
-      now = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:32], 'wind_info': forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
+      now = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:12], 'wind_info': forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
   if count == 1:
-      later = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'], 'wind_info' :  forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
+      later = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:12], 'wind_info' :  forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
   if count == 2:
       tomorrow = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'], 'wind_info' :  forecast_data_main['windSpeed']+ " " + forecast_data_main['windDirection']}
   count += 1
@@ -75,7 +75,26 @@ def get_inbound_trains():
   train_info_list.append(train_data)
  return jsonify(train_info_list)
 
-
+@app.route('/get_nyp_issues')
+def get_nyp_cancellations():
+ baseurl = 'http://dv.njtransit.com/mobile/tid-mobile.aspx?sid='
+ station = 'NY'
+ page = requests.get(baseurl + station)
+ tree = html.fromstring(page.content)
+ train_issue_list = [] # Create an empty list of outbound trains
+ train_count = 0
+ train_delay_count = 0
+ train_cancel_count= 0
+ while train_count <= 15:
+    train_status = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[6])' .format(train_count + 2)) #gets the status of each train
+    if train_status == "DELAYED" or train_status == "STAND BY":
+        train_delay_count += 1
+    if train_status == "CANCELLED":
+        train_cancel_count += 1
+    train_count += 1
+ train_issues = { 'checked': str(train_count), 'delay': str(train_delay_count), 'cancel': str(train_cancel_count) }
+ train_issue_list.append(train_issues)
+ return jsonify(train_issue_list)
 
 @app.after_request
 def after_request(response):
