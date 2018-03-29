@@ -33,9 +33,9 @@ def getweather():
  while count <= 3:
   forecast_data_main = forecast_periods[count]
   if count == 0:
-      now = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:12], 'wind_info': forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
+      now = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:16], 'wind_info': forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
   if count == 1:
-      later = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:12], 'wind_info' :  forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
+      later = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'][:16], 'wind_info' :  forecast_data_main['windSpeed'] + " " + forecast_data_main['windDirection']}
   if count == 2:
       tomorrow = { 'temp' : str(forecast_data_main['temperature']) + " F", 'period' : forecast_data_main['name'] + ":" , 'conditions': forecast_data_main['shortForecast'], 'wind_info' :  forecast_data_main['windSpeed']+ " " + forecast_data_main['windDirection']}
   count += 1
