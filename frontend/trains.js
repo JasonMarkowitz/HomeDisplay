@@ -1,4 +1,4 @@
-function train_status() {
+function train_status_nyp() {
 $.ajax({
 	url: "http://10.100.0.86:5000/get_inbound_trains",
 	datatype: 'jsonp',
@@ -26,6 +26,34 @@ $.ajax({
 });
 };
 
+function train_status_HOB() {
+$.ajax({
+	url: "http://10.100.0.86:5000/get_inbound_trains_HOB",
+	datatype: 'jsonp',
+	success: function(inbound_trains_HOB){
+		var inboundtrainsHOB = inbound_trains_HOB;
+		var tr_info_str_HOB = ""
+		if (inboundtrainsHOB == "" ) { 
+			var tr_info_str_HOB = "No Trains to HOB"
+			console.log("No HOB");
+		};
+		for (train in inboundtrainsHOB) {
+			var tr_time_HOB = inboundtrainsHOB[train].time;
+			var tr_number_HOB = inboundtrainsHOB[train].number;
+			var tr_status_HOB = inboundtrainsHOB[train].status;
+			tr_info_str_HOB += tr_time_HOB + ' ' + tr_number_HOB + ' ' + tr_status_HOB + "<br>"
+			// document.getElementById("tr_time").innerHTML = tr_time;
+			// document.getElementById("tr_number").innerHTML = tr_number;
+		        //document.getElementById("tr_status").innerHTML = tr_status;
+			train++;
+			console.log("Train Checked");
+		};
+		document.getElementById("tr_info_str_HOB").innerHTML = tr_info_str_HOB;	
+	},
+	
+});
+};
+
 function train_issues() {
 $.ajax({
 	url: "http://10.100.0.86:5000/get_nyp_issues",
@@ -42,8 +70,11 @@ $.ajax({
 });
 };
 
-train_status();
-setInterval(train_status, 180000);
+train_status_nyp();
+setInterval(train_status_nyp, 180000);
+
+train_status_HOB();
+setInterval(train_status_HOB, 180000);
 
 train_issues();
 setInterval(train_issues, 180000);
