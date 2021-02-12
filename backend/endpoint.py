@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 
 import os
 import sys
@@ -7,7 +7,9 @@ import requests
 import json
 from flask import Flask
 from lxml import html
+from lxml import etree
 import re
+import datetime
 
 from flask import jsonify
 app = Flask(__name__)
@@ -45,90 +47,136 @@ def getweather():
 #set station to your DepartureVision 
 @app.route('/get_inbound_trains_HOB')
 def get_inbound_trains_HOB():
- baseurl = 'http://dv.njtransit.com/mobile/tid-mobile.aspx?sid='
- station = 'MC'
- page = requests.get(baseurl + station)
+ # URL Handling Section
+ baseurl = 'https://traindata.njtransit.com/NJTSignData.asmx/getTrainScheduleJSON19Rec?username=DV4&password=ekd0J4MsYgmN56&station=MC&status=n'
+ #station = 'MC'
+ page = requests.get(baseurl)
  tree = html.fromstring(page.content)
- first_train = 2
+ cleaned = etree.tostring(tree, encoding='utf8', method='text')
+ cleaned = cleaned.decode("utf8")
+ cleanedj1 = json.loads(cleaned)
+ stationdata = cleanedj1['STATION']['ITEMS']['ITEM']
+ #End of URL handling
+ first_train = 0
  ny_train_count = 0
  attempt_count = 0
- ny_counter = first_train # Start out with 0 known NYC trains
- ny_train_list = [] #initalize empty list for NY trains
- while ny_train_count <= 5 and attempt_count <= 20: #while we know than less than 5 trains and go through the data 10x
-  regex = re.compile(r'Hoboken(....)*') #compile the regex for NYP
-  train_dest = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[2])'.format(ny_counter)) #Look at the Destinations
-  if re.match(regex, train_dest) is not None: #if the Train Destination is NYP:
-   ny_train_list.append(ny_counter) #add the value of the tr[x] to the list
-   ny_counter += 1  #set up for the next train
-   ny_train_count += 1 #Add one train to the number of NYP bound trains we'vefound so far
-  else: #if the train isn't headed for NY:
-   ny_counter += 1 #set up for the next train
-   attempt_count += 1 #log the attempt and move on
-
-  train_info_list=[] #generate an empty list to return on
-  #Return the Train Information
- for ny_trains in ny_train_list: #for each of the tr[x] in the list we created above
-  train_data = {} #initalize an empty dict object
-  train_data["status"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[6])' .format(ny_trains))
-  train_data["time"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[1])' .format(ny_trains)).split(' ', 1)[0]
-  train_data["number"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[5])' .format(ny_trains))
-  train_info_list.append(train_data)
+ ny_counter = first_train # initalize empty list for ny trains as we don't know any yet
+ train_list = [] #initalize empty list for NY trains
+ stationdata_object_count = len(stationdata)
+ train_info_list = [] 
+ #Iterate over the list, stationdata_object_count is the number of the indexes we have
+ while attempt_count < stationdata_object_count and ny_counter <= 5:
+  train = stationdata[attempt_count]
+  attempt_count += 1
+  #now lets look for if it's HOB bound
+  if train['DESTINATION'] == "Hoboken": #if it's HOBOKEN bound
+   ny_counter += 1
+   train_data = {}
+   train_data["status"] = train['STATUS']
+   # Time is a pain in the butt, convert it before we do things with it:
+   time_of_train = datetime.datetime.strptime(train['SCHED_DEP_DATE'], '%d-%b-%Y %I:%M:%S %p')
+   time_of_train = str(time_of_train.hour) + ":" + str(time_of_train.minute)
+   train_data["time"] = time_of_train
+   train_data["number"] = train['TRAIN_ID']
+   train_info_list.append(train_data)
  return jsonify(train_info_list)
 
 #Returns the next 5 NY Penn bound trains
 #set station to your DepartureVision 
 @app.route('/get_inbound_trains')
 def get_inbound_trains():
- baseurl = 'http://dv.njtransit.com/mobile/tid-mobile.aspx?sid='
- station = 'MC'
- page = requests.get(baseurl + station)
+ # URL Handling Section
+ baseurl = 'https://traindata.njtransit.com/NJTSignData.asmx/getTrainScheduleJSON19Rec?username=DV4&password=ekd0J4MsYgmN56&station=MC&status=n'
+ #station = 'MC'
+ page = requests.get(baseurl)
  tree = html.fromstring(page.content)
- first_train = 2
+ cleaned = etree.tostring(tree, encoding='utf8', method='text')
+ cleaned = cleaned.decode("utf8")
+ cleanedj1 = json.loads(cleaned)
+ stationdata = cleanedj1['STATION']['ITEMS']['ITEM']
+ #End of URL handling
+ first_train = 0
  ny_train_count = 0
  attempt_count = 0
- ny_counter = first_train # Start out with 0 known NYC trains
- ny_train_list = [] #initalize empty list for NY trains
- while ny_train_count <= 5 and attempt_count <= 20: #while we know than less than 5 trains and go through the data 10x
-  regex = re.compile(r'NY.Penn(....)*') #compile the regex for NYP
-  train_dest = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[2])'.format(ny_counter)) #Look at the Destinations
-  if re.match(regex, train_dest) is not None: #if the Train Destination is NYP:
-   ny_train_list.append(ny_counter) #add the value of the tr[x] to the list
-   ny_counter += 1  #set up for the next train
-   ny_train_count += 1 #Add one train to the number of NYP bound trains we'vefound so far
-  else: #if the train isn't headed for NY:
-   ny_counter += 1 #set up for the next train
-   attempt_count += 1 #log the attempt and move on
-
-  train_info_list=[] #generate an empty list to return on
-  #Return the Train Information
- for ny_trains in ny_train_list: #for each of the tr[x] in the list we created above
-  train_data = {} #initalize an empty dict object
-  train_data["status"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[6])' .format(ny_trains))
-  train_data["time"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[1])' .format(ny_trains)).split(' ', 1)[0]
-  train_data["number"] = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[5])' .format(ny_trains))
-  train_info_list.append(train_data)
+ train_data = {}
+ ny_counter = first_train # initalize empty list for ny trains as we don't know any yet
+ train_list = [] #initalize empty list for NY trains
+ stationdata_object_count = len(stationdata)
+ train_info_list = [] 
+#Iterate over the list, stationdata_object_count is the number of the indexes we have
+ while attempt_count < stationdata_object_count and ny_counter <= 10:
+  train = stationdata[attempt_count]
+  attempt_count += 1
+ #now lets look for if it's HOB bound
+  #print (re.search("New.York.*", train['DESTINATION']))
+  if re.search("New.York.*", train['DESTINATION']) is not None : #if it's New York bound
+#   print ("Found a NY Train", train['TRAIN_ID'])
+   ny_counter += 1
+   train_data = {}
+   train_data["status"] = train['STATUS']
+  # Time is a pain in the butt, convert it before we do things with it:
+   time_of_train = datetime.datetime.strptime(train['SCHED_DEP_DATE'], '%d-%b-%Y %I:%M:%S %p')
+   time_of_train = str(time_of_train.hour) + ":" + str(time_of_train.minute)
+   train_data["time"] = time_of_train
+   train_data["number"] = train['TRAIN_ID']
+   train_info_list.append(train_data)
  return jsonify(train_info_list)
 
 @app.route('/get_nyp_issues')
 def get_nyp_cancellations():
- baseurl = 'http://dv.njtransit.com/mobile/tid-mobile.aspx?sid='
+ baseurl = 'https://traindata.njtransit.com/NJTSignData.asmx/getTrainScheduleJSON19Rec?username=DV4&password=ekd0J4MsYgmN56&station=NY&status=n'
  station = 'NY'
- page = requests.get(baseurl + station)
+ page = requests.get(baseurl)
  tree = html.fromstring(page.content)
+ cleaned = etree.tostring(tree, encoding='utf8', method='text')
+ cleaned = cleaned.decode("utf8")
+ cleanedj1 = json.loads(cleaned)
+ stationdata = cleanedj1['STATION']['ITEMS']['ITEM']
+ #End of URL handling
  train_issue_list = [] # Create an empty list of outbound trains
  train_count = 0
  train_delay_count = 0
  train_cancel_count= 0
- while train_count <= 15:
-    train_status = tree.xpath('normalize-space(//*[@id="GridView1"]//tr[{0}]//td[6])' .format(train_count + 2)) #gets the status of each train
-    if train_status == "DELAYED" or train_status == "STAND BY":
-        train_delay_count += 1
-    if train_status == "CANCELLED":
-        train_cancel_count += 1
-    train_count += 1
+ attempt_count = 0
+ stationdata_object_count = len(stationdata)
+ train = stationdata[attempt_count]
+ while attempt_count < stationdata_object_count and train_count <= 15:
+  train = stationdata[attempt_count]
+  attempt_count += 1
+  train_status = train['STATUS']  #gets the status of each train
+
+  if train_status == "DELAYED" or train_status == "STAND BY":
+   train_delay_count += 1
+  if train_status == "CANCELLED":
+   train_cancel_count += 1
+
+  train_count += 1
  train_issues = { 'checked': str(train_count), 'delay': str(train_delay_count), 'cancel': str(train_cancel_count) }
+  #print (train_issues)
  train_issue_list.append(train_issues)
  return jsonify(train_issue_list)
+
+@app.route('/time_to_work')
+def time_to_work():
+#set Base URL, Home and Work ADDRS, and Compile the request string to google
+ baseurl = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
+ apikey = ''
+ homeaddr = ''
+ workaddr = ''
+ work_driving_time_raw = requests.get(baseurl + "units=imperial&origins=" + homeaddr + "&destinations=" + workaddr + "&departure_time=now" + "&key=" + apikey)
+ work_driving_time = json.loads(work_driving_time_raw.text)
+ #Get the Miles out of the "Rows" Returned
+ work_driving_time_rows = work_driving_time['rows']
+ work_driving_time_elements = work_driving_time_rows[0]
+ work_driving_time_element_list = work_driving_time_elements.get('elements')
+ work_driving_time_duration = work_driving_time_element_list[0]
+ work_driving_time_actual = work_driving_time_duration.get('duration_in_traffic')
+ work_driving_time_mins = work_driving_time_actual.get('text')
+ work_driving_distance = work_driving_time_duration.get('distance')
+ work_driving_distance_miles = work_driving_distance.get('text')
+ time_work = { 'time' : str(work_driving_time_mins) , 'distance' : str(work_driving_distance_miles) }
+ return jsonify(time_work)
+
 
 @app.after_request
 def after_request(response):
